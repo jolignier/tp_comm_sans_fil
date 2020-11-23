@@ -15,7 +15,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+public slots:
     void on_connect_clicked();
 
 private:
