@@ -1,4 +1,3 @@
-#include <stdint-gcc.h>
 #if (defined(UNDER_CE) || defined(_WIN32_WCE))
     /* WinCE is only a subset of Win32 */
     #ifndef WIN32
@@ -14,19 +13,24 @@
         #define WIN32
     #endif
 #endif
+#include <time.h>
 
 #ifdef WIN32
 
   /* Win32 code */
   /* ---------- */
 
-    #include <windows.h>
+    //#include <windows.h>
+    #include <winsock2.h>
     //#include <tchar.h>
-    //#include "types.h"
-
+//#include "stdint.h"
+#if ! defined (__cplusplus)
+    #include "types.h"
+#endif
     //typedef signed short SWORD;
     //typedef signed long  SDWORD;
-
+    #define Delays_Ms(ms) Sleep ((ms))
+    #define Delays_S(sec) Sleep ((sec) * 1000)
     #ifndef ODALID_LIB
         #if (defined (__GNUC__))
             #define ODALID_LIB
@@ -47,6 +51,7 @@
             #define ODALID_API __cdecl
         #endif
     #endif
+
 #else
 
   /* Not Win32 */
@@ -57,11 +62,13 @@
 
   /* Calling convention : not specified, use compiler default */
     #define ODALID_LIB
-
+    #include <string.h>
     #include <stdint.h>
     #include <stddef.h>
     typedef uint8_t BOOL;
-
+    typedef int SOCKET;
+    #define Delays_Ms(ms) usleep ((ms) * 1000)
+    #define Delays_S(sec) sleep ((sec))
     #ifndef TRUE
         #define TRUE 1
     #endif
@@ -78,6 +85,7 @@
             typedef char TCHAR;
         #endif
     #endif
+    typedef int16_t HANDLE;
 #endif
 
 #if defined (__cplusplus)
@@ -85,22 +93,23 @@ extern "C" {
 #endif
 
 typedef struct {
-    uint8_t Type;
-    uint8_t device;
-    char IPReader[16];
+	uint8_t Type;
+	uint8_t device;
+	char IPReader[16];
+	uint8_t stack;
+	uint8_t version[4];
+	uint8_t serial[4];
+    SOCKET hSocket;
+    HANDLE g_hCOM;
 }ReaderName;
 
 #define ReaderTCP           1
 #define ReaderCDC           2
 #define ReaderPCSC          3
 
-ODALID_LIB int16_t OpenCOM1(ReaderName *Name);
-ODALID_LIB int16_t CloseCOM1(ReaderName *Name);
-
-ODALID_LIB int16_t OpenCOMTCP(char *IPReader);
-ODALID_LIB int16_t CloseCOMTCP(void);
-ODALID_LIB int16_t OpenCOMCDC(uint8_t *device);
-ODALID_LIB int16_t CloseCOMCDC(void);
+ODALID_LIB int16_t OpenCOM(ReaderName *Name);
+ODALID_LIB int16_t CloseCOM(ReaderName *Name);
+ODALID_LIB int16_t GestionDeconnection(ReaderName *Name, int16_t statusconnection, uint8_t nbreconnection);
 
 #define LED_ON              0x07
 #define LED_OFF             0x00
@@ -112,6 +121,18 @@ ODALID_LIB int16_t CloseCOMCDC(void);
 #define LED_RED_ON          0x01
 #define BUZZER_OFF          0x00
 #define BUZZER_ON           0x08
+#define GACHE1_OFF          0x00
+#define GACHE1_ON           0x10
+#define GACHE2_OFF          0x00
+#define GACHE2_ON           0x20
+#define GACHE3_OFF          0x00
+#define GACHE3_ON           0x40
+#define GACHE4_OFF          0x00
+#define GACHE4_ON           0x80
+#define LED1_ON             0x01
+#define LED2_ON             0x02
+#define LED3_ON             0x04
+#define LED4_ON             0x10
 
 #define TypeA          0x01
 #define TypeB          0x02
@@ -122,17 +143,16 @@ ODALID_LIB int16_t CloseCOMCDC(void);
 
 ODALID_LIB char* GetErrorMessage(int16_t status);
 ODALID_LIB int16_t GetLibrary(char *recv, uint16_t *len_recv);
+
 ODALID_LIB int16_t Version(ReaderName *Name, char *version, uint8_t *serial, char *stack);
 ODALID_LIB int16_t Get_Property(ReaderName *Name, uint8_t AddReg, uint8_t *Reg);
 ODALID_LIB int16_t Set_Property(ReaderName *Name, uint8_t AddReg, uint8_t Reg);
 ODALID_LIB int16_t RF_Power_Control(ReaderName *Name, BOOL RFOnOff, uint8_t Delay);
 ODALID_LIB int16_t RF_Find(ReaderName *Name, uint8_t Type, uint8_t *TypeFind, uint8_t *uid, uint16_t *uid_len, uint8_t *info, uint16_t *info_len);
 ODALID_LIB int16_t RF_Config_Card_Mode(ReaderName *Name, uint8_t Type);
-ODALID_LIB int16_t RF_Transmit(ReaderName *Name, uint8_t *send, uint16_t *len_send, uint8_t *recv, uint16_t *len_recv, uint16_t timeout);
+ODALID_LIB int16_t RF_Transmit(ReaderName *Name, uint8_t *send, uint16_t len_send, uint8_t *recv, uint16_t *len_recv, uint16_t timeout);
 ODALID_LIB int16_t LEDBuzzer(ReaderName *Name, uint8_t LEDBuzzer);
 ODALID_LIB int16_t LCD(ReaderName *Name, uint8_t line, char *send);
-
-
 
 ODALID_LIB int16_t ISO14443_3_A_PollCard(ReaderName *Name, uint8_t *atq, uint8_t *sak, uint8_t *uid, uint16_t *uid_len);
 ODALID_LIB int16_t ISO14443_3_A_PollCardWU(ReaderName *Name, uint8_t *atq, uint8_t *sak, uint8_t *uid, uint16_t *uid_len);
@@ -145,7 +165,7 @@ ODALID_LIB int16_t ISO14443_4_A_RATS(ReaderName *Name, uint8_t CID, uint8_t *ats
 ODALID_LIB int16_t ISO14443_4_A_PPS(ReaderName *Name, uint8_t CID, uint8_t dsi, uint8_t dri);
 ODALID_LIB int16_t ISO14443_4_Deselect(ReaderName *Name, uint8_t Type);
 
-ODALID_LIB int16_t ISO14443_4_Transparent(ReaderName *Name, uint8_t Type, uint8_t CID, uint8_t NAD, uint8_t *CmdADPU, uint16_t lenCmdADPU, uint8_t *RespADPU, uint16_t *lenRespADPU);
+ODALID_LIB int16_t ISO14443_4_Transparent(ReaderName *Name, uint8_t Type, uint8_t *CmdADPU, uint16_t lenCmdADPU, uint8_t *RespADPU, uint16_t *lenRespADPU);
 
 ODALID_LIB int16_t CTS_PollCard(ReaderName *Name, uint8_t *code, uint8_t *serial);
 
@@ -169,6 +189,8 @@ ODALID_LIB int16_t ISO15693_PollCard(ReaderName *Name, uint8_t *DSFID, uint8_t *
 #define Auth_KeyB				FALSE
 
 ODALID_LIB int16_t Mf_Classic_LoadKey(ReaderName *Name, BOOL Auth_Key, uint8_t *key, uint8_t key_index);
+ODALID_LIB int16_t Mf_Classic_LoadKey2(ReaderName *Name, uint8_t *keyA, uint8_t *keyB, uint8_t key_index);
+ODALID_LIB int16_t Mf_Classic_PersonalizeUID(ReaderName *Name, uint8_t Type);
 ODALID_LIB int16_t Mf_Classic_Authenticate(ReaderName *Name, BOOL Auth_Key, BOOL internal_Key, uint8_t sector, uint8_t *key, uint8_t key_index);
 ODALID_LIB int16_t Mf_Classic_Read_Block(ReaderName *Name, BOOL auth, uint8_t block, uint8_t *Data, BOOL Auth_Key, uint8_t key_index);
 ODALID_LIB int16_t Mf_Classic_Write_Block(ReaderName *Name, BOOL auth, uint8_t block, uint8_t *Data, BOOL Auth_Key, uint8_t key_index);
@@ -181,10 +203,18 @@ ODALID_LIB int16_t Mf_Classic_Increment_Value(ReaderName *Name, BOOL auth, uint8
 ODALID_LIB int16_t Mf_Classic_Decrement_Value(ReaderName *Name, BOOL auth, uint8_t block, uint32_t valeur, uint8_t trans_block, BOOL Auth_Key, uint8_t key_index);
 ODALID_LIB int16_t Mf_Classic_Restore_Value(ReaderName *Name, BOOL auth, uint8_t block, uint8_t trans_block, BOOL Auth_Key, uint8_t key_index);
 
+ODALID_LIB int16_t Mf_Ultralight_Read(ReaderName *Name, uint8_t adr, uint8_t *data);
+ODALID_LIB int16_t Mf_Ultralight_CompatilityWrite(ReaderName *Name, uint8_t adr, uint8_t *data);
+ODALID_LIB int16_t Mf_UltralightC_Authenticate(ReaderName *Name, uint8_t *keyinit);
 
 ODALID_LIB int16_t Mf_Plus_Authenticate_SL1(ReaderName *Name, uint8_t *KeyBNr);
 ODALID_LIB int16_t Mf_Plus_CommitPerso_SL0(ReaderName *Name);
+ODALID_LIB int16_t Mf_Plus_WritePerso_SL0(ReaderName *Name, uint16_t address, uint8_t *data);
 
+#define DF_APPLSETTING2_ISO_EF_IDS          0x20
+#define DF_APPLSETTING2_DES_OR_3DES2K       0x00
+#define DF_APPLSETTING2_3DES3K              0x40
+#define DF_APPLSETTING2_AES                 0x80
 
 typedef struct
 {
@@ -235,13 +265,13 @@ typedef union
 ODALID_LIB char* Mf_DESFire_GetErrorMessage(int16_t status);
 
 //----------------------------Security related
-ODALID_LIB int16_t Mf_DESFire_AuthenticateHostEV0(ReaderName *Name, uint8_t DFKeyNo, uint8_t *pAccessKey);
-ODALID_LIB int16_t Mf_DESFire_AuthenticateHostEV1(ReaderName *Name, uint8_t DFKeyNo, uint8_t *pAccessKey);
-ODALID_LIB int16_t Mf_DESFire_AutenticateSAMEV0(ReaderName *Name, uint8_t DFKeyNo, uint8_t SAMKeyNo, uint8_t SAMKeyV);
-ODALID_LIB int16_t Mf_DESFire_AutenticateSAMEV1(ReaderName *Name, uint8_t DFKeyNo, uint8_t SAMKeyNo, uint8_t SAMKeyV);
+ODALID_LIB int16_t Mf_DESFire_AuthenticateHost(ReaderName *Name, uint8_t DFKeyNo, uint8_t *pAccessKey);
+ODALID_LIB int16_t Mf_DESFire_AuthenticateHostIso(ReaderName *Name, uint8_t DFKeyNo, uint8_t *pAccessKey);
+ODALID_LIB int16_t Mf_DESFire_AuthenticateHostAes(ReaderName *Name, uint8_t DFKeyNo, uint8_t *pAccessKey);
+ODALID_LIB int16_t Mf_DESFire_AutenticateSAM(ReaderName *Name, uint8_t DFKeyNo, uint8_t SAMKeyNo, uint8_t SAMKeyV);
 ODALID_LIB int16_t Mf_DESFire_ChangeKeySettings(ReaderName *Name, uint8_t  key_settings);
 ODALID_LIB int16_t Mf_DESFire_GetKeySettings(ReaderName *Name, uint8_t *DFKeySettings, uint8_t *DFMaxNoKey);
-ODALID_LIB int16_t Mf_DESFire_ChangeKey(ReaderName *Name, uint8_t key_number, int8_t *new_key, int8_t *old_key);
+ODALID_LIB int16_t Mf_DESFire_ChangeKey(ReaderName *Name, uint8_t key_number, uint8_t *new_key, uint8_t *old_key);
 ODALID_LIB int16_t Mf_DESFire_GetKeyVersion(ReaderName *Name, uint8_t KeyNumber, uint8_t *pKeyVersion);
 
 //----------------------------Picc level command
@@ -253,8 +283,8 @@ ODALID_LIB int16_t Mf_DESFire_SelectApplication(ReaderName *Name, uint32_t aid);
 ODALID_LIB int16_t Mf_DESFire_FormatPICC(ReaderName *Name);
 ODALID_LIB int16_t Mf_DESFire_GetVersion(ReaderName *Name, DF_VERSION_INFO *pVersionInfo);
 ODALID_LIB int16_t Mf_DESFire_FreeMem(ReaderName *Name, uint8_t *pFreeMem);
-ODALID_LIB int16_t Mf_DESFire_SetConfiguration(ReaderName *Name, uint8_t *pFreeMem);
-ODALID_LIB int16_t Mf_DESFire_GetCardUID(ReaderName *Name, uint8_t *pFreeMem);
+ODALID_LIB int16_t Mf_DESFire_SetConfiguration(ReaderName *Name, uint8_t option, uint8_t *data, uint8_t length);
+ODALID_LIB int16_t Mf_DESFire_GetCardUID(ReaderName *Name, uint8_t *uid);
 
 //----------------------------application level
 ODALID_LIB int16_t Mf_DESFire_GetFileIDs(ReaderName *Name, uint8_t *file_id, uint8_t nb_file_id);
@@ -279,6 +309,8 @@ ODALID_LIB int16_t Mf_DESFire_ReadRecord(ReaderName *Name, uint8_t File_No,  uin
 ODALID_LIB int16_t Mf_DESFire_WriteRecord(ReaderName *Name, uint8_t File_No, uint8_t com_mode, uint32_t Offset, uint32_t Lenght, uint8_t *Data);
 ODALID_LIB int16_t Mf_DESFire_CommitTransaction(ReaderName *Name);
 
+//----------------------------ISO
+ODALID_LIB int16_t Mf_DESFire_CreateIsoApplication(ReaderName *Name, uint32_t aid, uint8_t key_setting_1, uint8_t key_setting_2, uint16_t iso_df_id, uint8_t *iso_df_name, uint8_t iso_df_namelen);
 ///////////
 
 
@@ -300,6 +332,25 @@ ODALID_LIB int16_t ISO15693_WriteSingleBlock(ReaderName *Name, uint8_t *UID, uin
 ODALID_LIB int16_t ISO15693_LockBblock(ReaderName *Name, uint8_t *UID, uint8_t block, uint8_t *buffer);
 ODALID_LIB int16_t ISO15693_ReadMultipleBlocks(ReaderName *Name, uint8_t *UID, uint8_t start_block, uint8_t nbre_block, uint8_t *buffer);
 ODALID_LIB int16_t ISO15693_WriteMultipleBlocks(ReaderName *Name, uint8_t *UID, uint8_t start_block, uint8_t nbre_block, uint8_t *Data, uint8_t *buffer);
+
+ODALID_LIB int16_t ISO7816_SelectApplication(ReaderName *Name, uint8_t Type, uint8_t P1, uint8_t P2, char *AID, uint16_t AID_len, uint8_t *Data, uint16_t *Datalen);
+ODALID_LIB int16_t ISO7816_ReadRecord(ReaderName *Name, uint8_t Type, uint8_t rec_no, uint8_t sfi, uint8_t rec_size, uint8_t *Data, uint16_t *Datalen);
+ODALID_LIB int16_t ISO7816_GetProcessingOption(ReaderName *Name, uint8_t Type, uint8_t *pdol, uint16_t pdol_len, uint8_t *Data, uint16_t *Datalen);
+ODALID_LIB int16_t ISO7816_ReadSecured(ReaderName *Name, uint8_t Type, uint8_t *AccessId, uint8_t *HostCryptogram, uint8_t *HostChallenge, uint8_t *resp, uint16_t *len_resp);
+ODALID_LIB int16_t ISO7816_Read(ReaderName *Name, uint8_t Type, uint8_t *AccessId, uint8_t *resp, uint16_t *len_resp);
+
+
+typedef struct
+{
+  uint8_t card_slot;
+  uint8_t sam_slot;
+  uint8_t pcd_addr;
+  uint8_t picc_addr;
+  uint8_t picc_seq;
+  uint8_t in_session;
+  uint8_t card_sw[2];
+  uint8_t sam_sw[2];
+} CALYPSO_SEQ;
 
 typedef struct
 {
@@ -333,7 +384,6 @@ typedef struct
     uint8_t CurrentPin[4];
     uint8_t CurrentKif;
     uint8_t CurrentKvc;
-
 }CALYPSO_INFO;
 
 #define CALYPSO_MIN_SESSION_MODIFS 3
@@ -342,67 +392,70 @@ typedef struct
 
 #define CALYPSO_SFI_ENVIRONMENT         0x07
 #define CALYPSO_SFI_CONTRACTS           0x09
+#define CALYPSO_SFI_CONTRACTS_EXT       0x06
 #define CALYPSO_SFI_COUNTERS            0x19
+#define CALYPSO_SFI_COUNTERS_CD97       0x0A
 #define CALYPSO_SFI_EVENTS_LOG          0x08
 #define CALYPSO_SFI_SPECIAL_EVENTS      0x1D
 #define CALYPSO_SFI_CONTRACTS_LIST      0x1E
 
-#define CALYPSO_KEY_ISSUER         0x01
-#define CALYPSO_KIF_ISSUER         0x21
-#define CALYPSO_KNO_ISSUER         0x0C
+#define CALYPSO_KEY_ISSUER              0x01
+#define CALYPSO_KIF_ISSUER              0x21
+#define CALYPSO_KNO_ISSUER              0x0C
 
-#define CALYPSO_KEY_LOAD           0x02
-#define CALYPSO_KIF_LOAD           0x27
-#define CALYPSO_KNO_LOAD           0x02
+#define CALYPSO_KEY_LOAD                0x02
+#define CALYPSO_KIF_LOAD                0x27
+#define CALYPSO_KNO_LOAD                0x02
 
-#define CALYPSO_KEY_DEBIT          0x03
-#define CALYPSO_KIF_DEBIT          0x30
-#define CALYPSO_KNO_DEBIT          0x0D
+#define CALYPSO_KEY_DEBIT               0x03
+#define CALYPSO_KIF_DEBIT               0x30
+#define CALYPSO_KNO_DEBIT               0x0D
 
-#define CALYPSO_INS_GET_RESPONSE   0xC0
-#define CALYPSO_INS_SELECT         0xA4
-#define CALYPSO_INS_INVALIDATE     0x04
-#define CALYPSO_INS_REHABILITATE   0x44
-#define CALYPSO_INS_APPEND_RECORD  0xE2
-#define CALYPSO_INS_DECREASE       0x30
-#define CALYPSO_INS_INCREASE       0x32
-#define CALYPSO_INS_READ_BINARY    0xB0
-#define CALYPSO_INS_READ_RECORD    0xB2
-#define CALYPSO_INS_UPDATE_BINARY  0xD6
-#define CALYPSO_INS_UPDATE_RECORD  0xDC
-#define CALYPSO_INS_WRITE_RECORD   0xD2
-#define CALYPSO_INS_OPEN_SESSION   0x8A
-#define CALYPSO_INS_CLOSE_SESSION  0x8E
-#define CALYPSO_INS_GET_CHALLENGE  0x84
-#define CALYPSO_INS_CHANGE_PIN     0xD8
-#define CALYPSO_INS_VERIFY_PIN     0x20
+#define CALYPSO_INS_GET_RESPONSE        0xC0
+#define CALYPSO_INS_SELECT              0xA4
+#define CALYPSO_INS_INVALIDATE          0x04
+#define CALYPSO_INS_REHABILITATE        0x44
+#define CALYPSO_INS_APPEND_RECORD       0xE2
+#define CALYPSO_INS_DECREASE            0x30
+#define CALYPSO_INS_INCREASE            0x32
+#define CALYPSO_INS_READ_BINARY         0xB0
+#define CALYPSO_INS_READ_RECORD         0xB2
+#define CALYPSO_INS_UPDATE_BINARY       0xD6
+#define CALYPSO_INS_UPDATE_RECORD       0xDC
+#define CALYPSO_INS_WRITE_RECORD        0xD2
+#define CALYPSO_INS_OPEN_SESSION        0x8A
+#define CALYPSO_INS_CLOSE_SESSION       0x8E
+#define CALYPSO_INS_GET_CHALLENGE       0x84
+#define CALYPSO_INS_CHANGE_PIN          0xD8
+#define CALYPSO_INS_VERIFY_PIN          0x20
 
-#define CALYPSO_INS_SV_GET         0x7C
-#define CALYPSO_INS_SV_DEBIT       0xBA
-#define CALYPSO_INS_SV_RELOAD      0xB8
-#define CALYPSO_INS_SV_UN_DEBIT    0xBC
+#define CALYPSO_INS_SV_GET              0x7C
+#define CALYPSO_INS_SV_DEBIT            0xBA
+#define CALYPSO_INS_SV_RELOAD           0xB8
+#define CALYPSO_INS_SV_UN_DEBIT         0xBC
 
-#define CALYPSO_INS_SAM_SV_DEBIT   0x54
-#define CALYPSO_INS_SAM_SV_RELOAD  0x56
+#define CALYPSO_INS_SAM_SV_DEBIT        0x54
+#define CALYPSO_INS_SAM_SV_RELOAD       0x56
 
 
 //ODALID_LIB int16_t Calypso_GetResponse(ReaderName *Name, uint8_t Type, uint8_t *Data, uint8_t Datalen);
-ODALID_LIB int16_t Calypso_SelectApplication(ReaderName *Name, uint8_t Type, uint8_t *AID, uint8_t AID_len, CALYPSO_INFO *pInfo_Card);
+ODALID_LIB int16_t Calypso_SelectApplication(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, char *AID, uint8_t AID_len, CALYPSO_INFO *pInfo_Card);
 
-ODALID_LIB int16_t Calypso_AppendRecord(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Data, uint8_t Datalen);
-ODALID_LIB int16_t Calypso_Decrease(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint32_t DecValue, uint32_t *NewValue);
+ODALID_LIB int16_t Calypso_AppendRecord(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t sfi, uint8_t *Data, uint8_t Datalen);
+ODALID_LIB int16_t Calypso_Decrease(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint32_t DecValue, uint32_t *NewValue);
 //ODALID_LIB int16_t Calypso_DecreaseMultiple(ReaderName *Name, uint8_t Type, uint8_t sfi, uint32_t DecValue);
-ODALID_LIB int16_t Calypso_Increase(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint32_t IncValue, uint32_t *NewValue);
-//ODALID_LIB int16_t Calypso_IncreaseMultiple(ReaderName *Name, uint8_t Type, uint8_t sfi, uint32_t DecValue);
-ODALID_LIB int16_t Calypso_ReadRecord(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint8_t rec_size, uint8_t *Data, uint16_t *Datalen);
-ODALID_LIB int16_t Calypso_UpdateRecord(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint8_t *Data, uint8_t Datalen);
-ODALID_LIB int16_t Calypso_WriteRecord(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint8_t rec_size, uint8_t *Data, uint8_t Datalen);
+ODALID_LIB int16_t Calypso_Increase(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint32_t IncValue, uint32_t *NewValue);
+//ODALID_LIB int16_t Calypso_IncreaseMultiple(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t Type, uint8_t sfi, uint32_t DecValue);
+ODALID_LIB int16_t Calypso_ReadRecord(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint8_t rec_size, uint8_t *Data, uint16_t *Datalen);
+ODALID_LIB int16_t Calypso_UpdateRecord(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint8_t *Data, uint8_t Datalen);
+ODALID_LIB int16_t Calypso_WriteRecord(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t rec_no, uint8_t sfi, uint8_t rec_size, uint8_t *Data, uint8_t Datalen);
 
-ODALID_LIB int16_t Calypso_OpenSecureSession1(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t kvc, uint8_t rec_no, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Card_Challenge, uint8_t *Ratification, uint8_t *Resp, uint16_t *Resplen, uint8_t *Data, uint16_t *Datalen);
-ODALID_LIB int16_t Calypso_OpenSecureSession2(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t kvc, uint8_t rec_no, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Card_Challenge, uint8_t *Ratification, uint8_t *Resp, uint16_t *Resplen, uint8_t *Data, uint16_t *Datalen, uint8_t *kvc_resp);
-ODALID_LIB int16_t Calypso_OpenSecureSession3(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, uint8_t kvc, uint8_t rec_no, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Card_Challenge, uint8_t *Ratification, uint8_t *Resp, uint16_t *Resplen, uint8_t *Data, uint16_t *Datalen, uint8_t *kvc_resp, uint8_t *kif_resp);
-ODALID_LIB int16_t Calypso_CloseSecureSession(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card, BOOL ratify_now, uint8_t *Sam_Sign, uint8_t *Resp, uint16_t *Resplen);
-ODALID_LIB int16_t Calypso_Invalidate(ReaderName *Name, uint8_t Type, CALYPSO_INFO *pInfo_Card);
+ODALID_LIB int16_t Calypso_OpenSecureSession1(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t kvc, uint8_t rec_no, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Card_Challenge, uint8_t *Ratification, uint8_t *Resp, uint16_t *Resplen, uint8_t *Data, uint16_t *Datalen);
+ODALID_LIB int16_t Calypso_OpenSecureSession2(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t kvc, uint8_t rec_no, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Card_Challenge, uint8_t *Ratification, uint8_t *Resp, uint16_t *Resplen, uint8_t *Data, uint16_t *Datalen, uint8_t *kvc_resp);
+ODALID_LIB int16_t Calypso_OpenSecureSession3(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, uint8_t kvc, uint8_t rec_no, uint8_t sfi, uint8_t *Sam_Challenge, uint8_t *Card_Challenge, uint8_t *Ratification, uint8_t *Resp, uint16_t *Resplen, uint8_t *Data, uint16_t *Datalen, uint8_t *kvc_resp, uint8_t *kif_resp);
+ODALID_LIB int16_t Calypso_CloseSecureSession(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card, BOOL ratify_now, uint8_t *Sam_Sign, uint8_t *Resp, uint16_t *Resplen);
+ODALID_LIB int16_t Calypso_Invalidate(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card);
+ODALID_LIB int16_t Calypso_Ratification(ReaderName *Name, uint8_t Type, CALYPSO_SEQ *pSeq, CALYPSO_INFO *pInfo_Card);
 
 #define TypeISO         0x00
 #define TypeISO_T0      0x00
@@ -411,14 +464,13 @@ ODALID_LIB int16_t Calypso_Invalidate(ReaderName *Name, uint8_t Type, CALYPSO_IN
 
 typedef struct
 {
-    uint16_t RXDataLEN;		// Recieved Data length from smart card(excluding SW1 and SW2 bytes)
-    uint8_t SW1;          	// Status byte 1
-    uint8_t SW2;          	// Status byte 2
+    uint16_t sam_Datalen;		// Recieved Data length from smart card(excluding SW1 and SW2 bytes)
+    uint8_t sam_sw[2];
 } SC_APDU_RESPONSE;
 
-ODALID_LIB int16_t SAM_Config_Card_Mode(ReaderName *Name, uint8_t Type);
-ODALID_LIB int16_t SAM_SelectSlot(ReaderName *Name, uint8_t Slot);
-ODALID_LIB int16_t SAM_GetATR(ReaderName *Name, uint8_t *atr, uint16_t *atrlen);
+ODALID_LIB int16_t SAM_Config_Card_Mode_GetATR(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t Type, BOOL GetATR, uint8_t *atr, uint16_t *atrlen);
+//ODALID_LIB int16_t SAM_SelectSlot(ReaderName *Name, uint8_t Slot);
+//ODALID_LIB int16_t SAM_GetATR(ReaderName *Name, uint8_t *atr, uint16_t *atrlen);
 ODALID_LIB int16_t SAM_Transmit(ReaderName *Name, uint8_t *send, uint16_t *len_send, uint8_t *recv, SC_APDU_RESPONSE* apduResponse, uint16_t timeout);
 
 ODALID_LIB int16_t SAM_AV2_GetVersion(ReaderName *Name, uint8_t *pVersion);
@@ -426,13 +478,13 @@ ODALID_LIB int16_t SAM_AV2_GetKeyEntry(ReaderName *Name, uint8_t KeyNo);
 ODALID_LIB int16_t SAM_AV2_GetKUCEntry(ReaderName *Name, uint8_t RefNoKUC);
 ODALID_LIB int16_t SAM_AV2_ChangeKey_PICC(ReaderName *Name, uint8_t KeyCompMode, uint8_t KeyNoOld, uint8_t KeyVKeyOld, uint8_t KeyNoNew, uint8_t KeyVKeyNew, uint8_t *uid);
 
-ODALID_LIB int16_t SAM_Calypso_SelectDiversifer(ReaderName *Name, uint8_t *UID);
-ODALID_LIB int16_t SAM_Calypso_GetChallenge(ReaderName *Name, uint8_t *Challenge);
-ODALID_LIB int16_t SAM_Calypso_DigestInit(ReaderName *Name, int8_t kif, uint8_t kvc, uint8_t *Data, uint8_t Datalen);
-ODALID_LIB int16_t SAM_Calypso_DigestInitOld(ReaderName *Name, uint8_t key, uint8_t *Data, uint8_t Datalen);
-ODALID_LIB int16_t SAM_Calypso_DigestUpdate(ReaderName *Name, uint8_t *Data, uint8_t Datalen);
-ODALID_LIB int16_t SAM_Calypso_DigestClose(ReaderName *Name, uint8_t *SignHi);
-ODALID_LIB int16_t SAM_Calypso_DigestAuthenticate(ReaderName *Name, uint8_t *SignLo);
+ODALID_LIB int16_t SAM_Calypso_SelectDiversifer(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t *UID);
+ODALID_LIB int16_t SAM_Calypso_GetChallenge(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t *Challenge);
+ODALID_LIB int16_t SAM_Calypso_DigestInit(ReaderName *Name, CALYPSO_SEQ *pSeq, int8_t kif, uint8_t kvc, uint8_t *Data, uint8_t Datalen);
+ODALID_LIB int16_t SAM_Calypso_DigestInitOld(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t key, uint8_t *Data, uint8_t Datalen);
+ODALID_LIB int16_t SAM_Calypso_DigestUpdate(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t *Data, uint8_t Datalen);
+ODALID_LIB int16_t SAM_Calypso_DigestClose(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t *mac);
+ODALID_LIB int16_t SAM_Calypso_DigestAuthenticate(ReaderName *Name, CALYPSO_SEQ *pSeq, uint8_t *SignLo);
 
 ODALID_LIB uint8_t ByteToBcd(uint8_t input);
 ODALID_LIB uint8_t BcdToByte(uint8_t input);
@@ -448,6 +500,7 @@ ODALID_LIB int16_t Wifi_Config(ReaderName *Name, uint8_t SecurityMode, uint8_t S
 #define Dec_Value				FALSE
 
 ODALID_LIB int16_t AutoReader_SetRTC(ReaderName *Name, BOOL TimeHost, uint8_t *Time);
+ODALID_LIB int16_t AutoReader_FindCard(ReaderName *Name, BOOL FindCard);
 ODALID_LIB int16_t AutoReader_DeleteUser(ReaderName *Name, uint8_t *User);
 ODALID_LIB int16_t AutoReader_AddUser(ReaderName *Name, uint8_t *User);
 ODALID_LIB int16_t AutoReader_ClearFullUser(ReaderName *Name);
@@ -462,10 +515,16 @@ ODALID_LIB int16_t AutoReader_LCD1(ReaderName *Name, BOOL option, uint8_t *LCD);
 ODALID_LIB int16_t AutoReader_LCD2A(ReaderName *Name, BOOL option, uint8_t *LCD);
 ODALID_LIB int16_t AutoReader_LCD2B(ReaderName *Name, BOOL option, uint8_t *LCD);
 ODALID_LIB int16_t AutoReader_LCD2C(ReaderName *Name, BOOL option, uint8_t *LCD);
-ODALID_LIB int16_t AutoReader_Download(ReaderName *Name, uint16_t PremierDownload, uint8_t NbreDownload, uint8_t *Data, uint16_t *Datalen);
-ODALID_LIB int16_t AutoReader_Download_FULL(ReaderName *Name, BOOL ClearSave, char *FilePath);
+ODALID_LIB int16_t AutoReader_Download(ReaderName *Name, uint16_t PremierDownload, uint8_t NbreDownload, BOOL TraitementMIFARE, uint8_t *data, uint16_t *data_len);
+ODALID_LIB int16_t AutoReader_Download_FULL(ReaderName *Name, BOOL ClearSave, BOOL TraitementMIFARE, char *FilePath);
 ODALID_LIB int16_t AutoReader_ClearSave(ReaderName *Name);
-ODALID_LIB int16_t AutoReader_NbreSave(ReaderName *Name, uint16_t *NbreSave);
+ODALID_LIB int16_t AutoReader_NbreSave(ReaderName *Name, BOOL TraitementMIFARE, uint16_t *NbreSave);
+ODALID_LIB int16_t AutoReader_GetInfo(ReaderName *Name, BOOL *SendInfo, char *IPServeur, uint16_t *Port, uint8_t *info, uint16_t *info_len);
+ODALID_LIB int16_t AutoReader_Reset(ReaderName *Name);
+
+/*ODALID_LIB uint16_t AesSetKey(Aes* aes, const byte* key, word32 len, const byte* iv, int dir);
+ODALID_LIB uint16_t AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz);
+ODALID_LIB uint16_t RotatesLeft(uint8_t *_pbyDataOut, uint8_t *_pbyDataIn, uint8_t nbre);*/
 
 #if defined (__cplusplus)
 }

@@ -201,8 +201,25 @@
  <resources>
   <include location="resource.qrc"/>
  </resources>
- <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
+ <connections>
+  <connection>
+   <sender>groupBox_4</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_connect_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>133</x>
+     <y>400</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>15</x>
+     <y>360</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>on_connect_clicked()</slot>
+ </slots>
 </ui>
