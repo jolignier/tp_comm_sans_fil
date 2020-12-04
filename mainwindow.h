@@ -23,8 +23,10 @@ public slots:
     void on_pay_clicked();
     void on_credit_clicked();
 
-
+protected:
+    void closeEvent(QCloseEvent *event);
 private:
     Ui::MainWindow *ui;
+
 };
 #endif // MAINWINDOW_H
