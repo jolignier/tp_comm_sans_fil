@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.13.3, 2020-12-04T13:37:03. -->
+<!-- Written by QtCreator 4.13.3, 2020-11-23T14:04:34. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{593a6f40-1fb6-49ce-af26-e144abf940af}</value>
+  <value type="QByteArray">{97d52b9a-6c90-4835-9edc-da8ea8ac0170}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -96,8 +96,8 @@
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <value type="bool">true</value>
     <value type="int" key="EnableQmlDebugging">0</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\vj044420\Documents\GitHub\build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Debug</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory.shadowDir">C:/Users/vj044420/Documents/GitHub/build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\jl219611\Documents\GitHub\build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory.shadowDir">C:/Users/jl219611/Documents/GitHub/build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -148,8 +148,8 @@
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
     <value type="bool">true</value>
     <value type="int" key="EnableQmlDebugging">2</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\vj044420\Documents\GitHub\build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Release</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory.shadowDir">C:/Users/vj044420/Documents/GitHub/build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Release</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\jl219611\Documents\GitHub\build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Release</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory.shadowDir">C:/Users/jl219611/Documents/GitHub/build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Release</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -200,8 +200,8 @@
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.2">
     <value type="bool">true</value>
     <value type="int" key="EnableQmlDebugging">0</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\vj044420\Documents\GitHub\build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Profile</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory.shadowDir">C:/Users/vj044420/Documents/GitHub/build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Profile</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\jl219611\Documents\GitHub\build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Profile</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory.shadowDir">C:/Users/jl219611/Documents/GitHub/build-TP_comm_sans_fil-Desktop_Qt_5_15_2_MinGW_64_bit-Profile</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>

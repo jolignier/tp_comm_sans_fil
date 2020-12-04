@@ -17,6 +17,12 @@ public:
 
 public slots:
     void on_connect_clicked();
+    void on_select_clicked();
+    void on_deconnect_clicked();
+    void on_update_clicked();
+    void on_pay_clicked();
+    void on_credit_clicked();
+
 
 private:
     Ui::MainWindow *ui;

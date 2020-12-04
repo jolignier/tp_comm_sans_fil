@@ -42,24 +42,24 @@
          <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
+         <item row="1" column="0" colspan="2">
+          <widget class="QPushButton" name="selectionner">
+           <property name="text">
+            <string>Séléctionner la carte</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="connecter">
            <property name="text">
             <string>Connecter</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="deconnecter">
            <property name="text">
             <string>Déconnecter</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="text">
-            <string>Séléctionner la carte</string>
            </property>
           </widget>
          </item>
@@ -192,7 +192,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
   </widget>
@@ -203,7 +203,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>connecter</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>on_connect_clicked()</slot>
@@ -218,8 +218,93 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>deconnecter</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_deconnect_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>434</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>405</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>selectionner</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_select_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>331</x>
+     <y>505</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>547</x>
+     <y>471</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>crediter</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_credit_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>663</x>
+     <y>519</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>549</x>
+     <y>538</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>payer</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_pay_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>621</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>547</x>
+     <y>326</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mettre_a_jour</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_update_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>639</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>549</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>on_connect_clicked()</slot>
+  <slot>on_deconnect_clicked()</slot>
+  <slot>on_select_clicked()</slot>
+  <slot>on_credit_clicked()</slot>
+  <slot>on_update_clicked()</slot>
+  <slot>on_pay_clicked()</slot>
  </slots>
 </ui>

@@ -11,7 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    qDebug() << "hello world";
 }
 
 ReaderName Reader;
@@ -38,3 +37,24 @@ void MainWindow::on_connect_clicked(){
 
     qDebug() << "OpenCOM" << status << version;
 }
+
+void MainWindow::on_select_clicked(){
+    qDebug() << "select";
+}
+
+void MainWindow::on_deconnect_clicked(){
+    qDebug() << "deconnect";
+}
+
+void MainWindow::on_update_clicked(){
+    qDebug() << "update";
+}
+
+void MainWindow::on_pay_clicked(){
+    qDebug() << "pay";
+}
+
+void MainWindow::on_credit_clicked(){
+    qDebug() << "credit";
+}
+
