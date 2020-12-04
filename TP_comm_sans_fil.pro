@@ -22,6 +22,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    MfErrNo.h \
     mainwindow.h
 
 FORMS += \
