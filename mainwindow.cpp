@@ -6,6 +6,18 @@
 #include <QDebug>
 #include <QtGui>
 
+
+// ------------------------------------------
+// ----------- Variables globales -----------
+// ------------------------------------------
+
+ReaderName Reader;
+char pszHost[] = "192.168.1.4";
+
+// ------------------------------------------
+// --------- Gestion de la fenêtre ----------
+// ------------------------------------------
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -13,13 +25,23 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 }
 
-ReaderName Reader;
-char pszHost[] = "192.168.1.4";
-
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::closeEvent(QCloseEvent *event){
+    qDebug() << "Program closed";
+    int16_t status = 0;
+    RF_Power_Control(&Reader, FALSE, 0);
+    status = LEDBuzzer(&Reader, LED_OFF);
+    status = CloseCOM(&Reader);
+    qApp->quit();
+}
+
+// ------------------------------------------
+// ---------- Connexion à la carte ----------
+// ------------------------------------------
 
 void MainWindow::on_connect_clicked(){
     qDebug() << "clicked !";
