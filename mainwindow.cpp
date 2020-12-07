@@ -69,46 +69,35 @@ void MainWindow::on_connect_clicked(){
 
     qDebug() << "OpenCOM" << reader_status << version;
 
-    unsigned char data[240];
+
+
+    // Enable Reader RF Field
+    RF_Power_Control(&Reader, TRUE, 0);
     int status = 0;
 
-    BYTE sect_count = 16;
-    BYTE bloc_count, bloc, sect, offset;
-    BYTE atq[2];
-    BYTE sak[1];
-    BYTE uid[12];
-    BYTE uid_len = 12;
+    // Load Keys into reader memory
+    status = Mf_Classic_LoadKey(&Reader, Auth_KeyA, auth_key_A, 2);
+    qDebug() <<" Load key A" << status;
+    status = Mf_Classic_LoadKey(&Reader, Auth_KeyB, auth_key_B, 2);
+    qDebug() <<" Load key B" << status;
 
-    for (BYTE sect = 0; sect < sect_count; sect++){
-        status = Mf_Classic_Authenticate(&Reader, Auth_KeyB, FALSE, sect, key_ff, 0);
-        status = Mf_Classic_Read_Sector(&Reader, FALSE, sect, data, Auth_KeyA, 0);
-
-        if (status != MI_OK){
-            printf("[Failed]\n");
-            printf("%s (%d)\n", GetErrorMessage(status), status);
-        }
-        else {
-            if (sect < 32)
-                bloc_count = 3;
-            else
-                bloc_count = 15;
-            for (bloc = 0; bloc < bloc_count; bloc++){
-                for (offset = 0; offset<16; offset++)
-                    printf("%02X ", data[16 * bloc + offset]);
-                    if (data[16 * bloc + offset] >= ' '){
-                        printf("%c", data[16 * bloc + offset]);
-                    } else {
-                        printf(".");
-                    }
-            }
-
-        }
-    }
+    status = Mf_Classic_LoadKey(&Reader, Auth_KeyA, counter_key_A, 3);
+    qDebug() <<" Load key C" << status;
+    status = Mf_Classic_LoadKey(&Reader, Auth_KeyB, counter_key_B, 3);
+    qDebug() <<" Load key D" << status;
 
 }
 
 void MainWindow::on_select_clicked(){
     qDebug() << "select";
+
+    uint8_t data[16];
+    int16_t status =0;
+
+    status = Mf_Classic_Read_Block(&Reader, TRUE, 10, data, Auth_KeyA, 2);
+    qDebug() << "Read Block status" << status ;
+
+
 }
 
 void MainWindow::on_deconnect_clicked(){
