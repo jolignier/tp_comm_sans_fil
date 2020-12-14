@@ -17,7 +17,6 @@ public:
 
 public slots:
     void on_connect_clicked();
-    void on_select_clicked();
     void on_deconnect_clicked();
     void on_update_clicked();
     void on_pay_clicked();
@@ -27,6 +26,9 @@ protected:
     void closeEvent(QCloseEvent *event);
 private:
     Ui::MainWindow *ui;
+    QString read_name();
+    QString read_surname();
+    QString read_counter();
 
 };
 #endif // MAINWINDOW_H
