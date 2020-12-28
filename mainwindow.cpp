@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QtGui>
+#include <QMessageBox>
 
 
 // ------------------------------------------
@@ -111,6 +112,10 @@ void MainWindow::on_connect_clicked(){
 
 }
 
+// ------------------------------------------
+// ------- Lecture du nom de famille --------
+// ------------------------------------------
+
 QString MainWindow::read_surname(){
 
     uint8_t data[16];
@@ -122,6 +127,10 @@ QString MainWindow::read_surname(){
     QString surname((char*)data);
     return surname;
 }
+
+// ------------------------------------------
+// ----------- Lecture du prénom ------------
+// ------------------------------------------
 
 QString MainWindow::read_name(){
 
@@ -135,18 +144,25 @@ QString MainWindow::read_name(){
     return surname;
 }
 
+// ------------------------------------------
+// ------------ Lecture du solde ------------
+// ------------------------------------------
+
 QString MainWindow::read_counter(){
 
-    uint8_t data[16];
+    uint32_t data[16];
     int16_t status =0;
 
-    status = Mf_Classic_Read_Block(&Reader, TRUE, (counter_sector*4)+1, data, Auth_KeyA, counter_key_index);
-    qDebug() << "Read Counter Block status" << status ;
+    status = Mf_Classic_Read_Value(&Reader, TRUE, (counter_sector*4)+1, data, Auth_KeyA, counter_key_index);
+    qDebug() << "Read Counter Value status" << status ;
 
-    QString value((char*)data);
-    qDebug() << data;
+    QString value = QString::number(data[0]);
     return value;
 }
+
+// ------------------------------------------
+// -------- Déconnexion de la carte ---------
+// ------------------------------------------
 
 void MainWindow::on_deconnect_clicked(){
     qDebug() << "deconnect";
@@ -175,6 +191,10 @@ void MainWindow::on_deconnect_clicked(){
     status = CloseCOM(&Reader);
 }
 
+// ------------------------------------------
+// ------- Mise à jour de l'identité --------
+// ------------------------------------------
+
 void MainWindow::on_update_clicked(){
     //Varibles declaration
     uint8_t data[18];
@@ -198,34 +218,47 @@ void MainWindow::on_update_clicked(){
 
 }
 
+// ------------------------------------------
+// -------- Décrémentation du solde ---------
+// ------------------------------------------
+
 void MainWindow::on_pay_clicked(){
     int16_t status = 0;
     int amount = ui->nb_a_payer->value();
     this->ui->nb_a_payer->setValue(0);
 
-
-    //Décrémenter la valeur de credit dans le Backup Compteur (bloc 13) de 1
-    status = Mf_Classic_Decrement_Value(&Reader, TRUE, (counter_sector*4)+2, amount, (counter_sector*4)+1, Auth_KeyA, counter_key_index);
-    qDebug() << "Mf_Classic_Decrement" << status;
-    //Copier la valeur du Backup Compteur (bloc 13) dans le Compteur (bloc 14)
-    status = Mf_Classic_Restore_Value(&Reader, TRUE, (counter_sector*4)+1, (counter_sector*4)+2, Auth_KeyB, counter_key_index);
-    qDebug() << "Mf_Classic_Restore" << status;
+    // Si le solde est suffisant pour payer
+    if (read_counter().toInt() >= amount) {
+        //Décrémenter la valeur de credit dans le Backup Compteur (bloc 13) de 1
+        status = Mf_Classic_Decrement_Value(&Reader, TRUE, (counter_sector*4)+2, amount, (counter_sector*4)+1, Auth_KeyA, counter_key_index);
+        qDebug() << "Mf_Classic_Decrement" << status;
+        //Copier la valeur du Backup Compteur (bloc 13) dans le Compteur (bloc 14)
+        status = Mf_Classic_Restore_Value(&Reader, TRUE, (counter_sector*4)+1, (counter_sector*4)+2, Auth_KeyB, counter_key_index);
+        qDebug() << "Mf_Classic_Restore" << status;
+    } else {
+        QMessageBox msgBox;
+        msgBox.setText("Le solde est insuffisant !");
+        msgBox.exec();
+    }
 
     QString solde = read_counter();
     this->ui->solde->setText(solde);
     this->ui->solde->update();
 }
 
+// ------------------------------------------
+// -------- Incrémentation du solde ---------
+// ------------------------------------------
+
+// Condition d'accès : 001 => Permet le décrement et la lecture
+// Condition d'accès : 110 => Permet l'increment avec la clé B (=clé D)
 void MainWindow::on_credit_clicked(){
     int16_t status = 0;
     int amount = ui->nb_a_crediter->value();
-    qDebug() << amount;
     this->ui->nb_a_crediter->setValue(0);
 
-    status = ISO14443_3_A_PollCard(&Reader, atq, sak, uid, &uid_len);
-
     //Décrémenter la valeur de credit dans le Backup Compteur (bloc 13) de 1
-    status = Mf_Classic_Increment_Value(&Reader, TRUE, (counter_sector*4)+2, amount, (counter_sector*4)+1, Auth_KeyA, counter_key_index);
+    status = Mf_Classic_Increment_Value(&Reader, TRUE, (counter_sector*4)+2, amount, (counter_sector*4)+1, Auth_KeyB, counter_key_index);
     qDebug() << "Mf_Classic_Decrement" << status;
     //Copier la valeur du Backup Compteur (bloc 13) dans le Compteur (bloc 14)
     status = Mf_Classic_Restore_Value(&Reader, TRUE, (counter_sector*4)+1, (counter_sector*4)+2, Auth_KeyB, counter_key_index);
