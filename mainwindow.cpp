@@ -53,7 +53,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
     int16_t status = 0;
     RF_Power_Control(&Reader, FALSE, 0);
     status = LEDBuzzer(&Reader, LED_OFF);
-    status = CloseCOM(&Reader);
+    //status = CloseCOM(&Reader);
     qApp->quit();
 }
 
@@ -66,7 +66,7 @@ void MainWindow::on_connect_clicked(){
     uint16_t reader_status = 0;
     Reader.Type = ReaderCDC;
     Reader.device = 0;
-    reader_status = OpenCOM(&Reader);
+    //reader_status = OpenCOM(&Reader);
 
     char version[30];
     uint8_t serial[4];
@@ -188,7 +188,7 @@ void MainWindow::on_deconnect_clicked(){
     int16_t status = 0;
     status = ISO14443_3_A_Halt(&Reader);
     RF_Power_Control(&Reader, FALSE, 0);
-    status = CloseCOM(&Reader);
+    //status = CloseCOM(&Reader);
 }
 
 // ------------------------------------------
@@ -208,12 +208,12 @@ void MainWindow::on_update_clicked(){
 
     strncpy((char*)data, lastName.toUtf8().constData(), 16);
     qDebug() << "Data -> " << (char*)data;
-    status = Mf_Classic_Write_Block(&Reader, TRUE, (2*4)+2, data, Auth_KeyB, 2);
+    status = Mf_Classic_Write_Block(&Reader, TRUE, (auth_sector*4)+2, data, Auth_KeyB, auth_key_index);
     qDebug() << "Write block Status -> " << status;
 
-    strncpy((char*)data, firstName.toLatin1().constData(), 16);
+    strncpy((char*)data, firstName.toUtf8().constData(), 16);
     qDebug() << "Data -> " << (char*)data;
-    status = Mf_Classic_Write_Block(&Reader, TRUE, (2*4)+1, data, Auth_KeyB, 2);
+    status = Mf_Classic_Write_Block(&Reader, TRUE, (auth_sector*4)+1, data, Auth_KeyB, auth_key_index);
     qDebug() << "Write block Status -> " << status;
 
 }

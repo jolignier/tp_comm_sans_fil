@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Gestionnaire de carte MIFARE</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -99,6 +99,9 @@ border: none;
 color: black;
 font-size: 14pt;</string>
            </property>
+           <property name="text">
+            <string/>
+           </property>
           </widget>
          </item>
          <item row="5" column="1">
@@ -111,6 +114,9 @@ font-size: 14pt;</string>
 border: none;
 color: black;
 font-size: 14pt;</string>
+           </property>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
@@ -298,6 +304,9 @@ border: none;
 color: black;
 font-size: 14pt;</string>
              </property>
+             <property name="text">
+              <string/>
+             </property>
             </widget>
            </item>
            <item row="1" column="0" colspan="2">
@@ -317,6 +326,9 @@ font-size: 14pt;</string>
 border: none;
 color: black;
 font-size: 14pt;</string>
+             </property>
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -345,7 +357,7 @@ font-size: 14pt;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

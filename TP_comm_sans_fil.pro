@@ -4,7 +4,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-LIBS += -L$$PWD/lib -lODALID
+LIBS += -L$$PWD/lib_32 -lODALID
+
+RC_ICONS = mifare.ico
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
