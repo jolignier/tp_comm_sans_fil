@@ -53,7 +53,10 @@ void MainWindow::closeEvent(QCloseEvent *event){
     int16_t status = 0;
     RF_Power_Control(&Reader, FALSE, 0);
     status = LEDBuzzer(&Reader, LED_OFF);
-    //status = CloseCOM(&Reader);
+    status = CloseCOM(&Reader);
+    if (status == 0){
+        LEDBuzzer(&Reader, LED_YELLOW_OFF);
+    }
     qApp->quit();
 }
 
@@ -66,12 +69,17 @@ void MainWindow::on_connect_clicked(){
     uint16_t reader_status = 0;
     Reader.Type = ReaderCDC;
     Reader.device = 0;
-    //reader_status = OpenCOM(&Reader);
+    reader_status = OpenCOM(&Reader);
 
     char version[30];
     uint8_t serial[4];
     char stackReader[20];
     reader_status = Version(&Reader, version, serial, stackReader);
+
+    // Reader is connected, display YELLOW LED
+    if (reader_status == 0){
+        LEDBuzzer(&Reader, LED_YELLOW_ON);
+    }
 
     qDebug() << "OpenCOM" << reader_status << version;
 
@@ -95,6 +103,7 @@ void MainWindow::on_connect_clicked(){
 
     status = ISO14443_3_A_PollCard(&Reader, atq, sak, uid, &uid_len);
 
+
     QString prenom = read_name();
     QString nom = read_surname();
     QString solde = read_counter();
@@ -113,6 +122,34 @@ void MainWindow::on_connect_clicked(){
 }
 
 // ------------------------------------------
+// ----- Modification des LED et Buzzer -----
+// ------------------------------------------
+
+
+void MainWindow::applyLedBuzz(int status){
+    // Read is successful, One buzz and green light
+    if (status == 0){
+        LEDBuzzer(&Reader, LED_GREEN_ON);
+        LEDBuzzer(&Reader, BUZZER_ON);
+        Sleep(500);
+        LEDBuzzer(&Reader, LED_GREEN_OFF);
+        LEDBuzzer(&Reader, BUZZER_OFF);
+    } else { // Read is not successfull, Two little buzz and red light
+        // Buzz 0.2s, wait 0.1s and buzz 0.2s again
+        LEDBuzzer(&Reader, LED_RED_ON);
+        LEDBuzzer(&Reader, BUZZER_ON);
+        Sleep(200);
+        LEDBuzzer(&Reader, BUZZER_OFF);
+
+        Sleep(100);
+        LEDBuzzer(&Reader, BUZZER_ON);
+        Sleep(200);
+        LEDBuzzer(&Reader, BUZZER_OFF);
+        LEDBuzzer(&Reader, LED_RED_OFF);
+    }
+}
+
+// ------------------------------------------
 // ------- Lecture du nom de famille --------
 // ------------------------------------------
 
@@ -122,7 +159,9 @@ QString MainWindow::read_surname(){
     int16_t status =0;
 
     status = Mf_Classic_Read_Block(&Reader, TRUE, (auth_sector*4)+2, data, Auth_KeyA, auth_key_index);
-    qDebug() << "Read Surname Block status" << status ;
+    qDebug() << "Read Surname Block status" << status ;                
+
+    applyLedBuzz(status);
 
     QString surname((char*)data);
     return surname;
@@ -140,8 +179,10 @@ QString MainWindow::read_name(){
     status = Mf_Classic_Read_Block(&Reader, TRUE, (auth_sector*4)+1, data, Auth_KeyA, auth_key_index);
     qDebug() << "Read Name Block status" << status ;
 
-    QString surname((char*)data);
-    return surname;
+    applyLedBuzz(status);
+
+    QString name((char*)data);
+    return name;
 }
 
 // ------------------------------------------
@@ -155,6 +196,8 @@ QString MainWindow::read_counter(){
 
     status = Mf_Classic_Read_Value(&Reader, TRUE, (counter_sector*4)+1, data, Auth_KeyA, counter_key_index);
     qDebug() << "Read Counter Value status" << status ;
+
+    applyLedBuzz(status);
 
     QString value = QString::number(data[0]);
     return value;
@@ -188,7 +231,11 @@ void MainWindow::on_deconnect_clicked(){
     int16_t status = 0;
     status = ISO14443_3_A_Halt(&Reader);
     RF_Power_Control(&Reader, FALSE, 0);
-    //status = CloseCOM(&Reader);
+    status = CloseCOM(&Reader);
+
+    if (status == 0){
+        LEDBuzzer(&Reader, LED_YELLOW_OFF);
+    }
 }
 
 // ------------------------------------------
@@ -216,6 +263,8 @@ void MainWindow::on_update_clicked(){
     status = Mf_Classic_Write_Block(&Reader, TRUE, (auth_sector*4)+1, data, Auth_KeyB, auth_key_index);
     qDebug() << "Write block Status -> " << status;
 
+    applyLedBuzz(status);
+
 }
 
 // ------------------------------------------
@@ -241,6 +290,8 @@ void MainWindow::on_pay_clicked(){
         msgBox.exec();
     }
 
+    applyLedBuzz(status);
+
     QString solde = read_counter();
     this->ui->solde->setText(solde);
     this->ui->solde->update();
@@ -263,6 +314,8 @@ void MainWindow::on_credit_clicked(){
     //Copier la valeur du Backup Compteur (bloc 13) dans le Compteur (bloc 14)
     status = Mf_Classic_Restore_Value(&Reader, TRUE, (counter_sector*4)+1, (counter_sector*4)+2, Auth_KeyB, counter_key_index);
     qDebug() << "Mf_Classic_Restore" << status;
+
+    applyLedBuzz(status);
 
     QString solde = read_counter();
     this->ui->solde->setText(solde);

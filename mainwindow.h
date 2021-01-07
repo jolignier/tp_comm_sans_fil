@@ -26,6 +26,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 private:
     Ui::MainWindow *ui;
+    void applyLedBuzz(int status);
     QString read_name();
     QString read_surname();
     QString read_counter();

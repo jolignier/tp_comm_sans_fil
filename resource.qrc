@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/images">
         <file alias="mifare">mifare.png</file>
+        <file>mifare.ico</file>
     </qresource>
 </RCC>
